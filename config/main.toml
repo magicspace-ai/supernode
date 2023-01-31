@@ -1,0 +1,42 @@
+
+# config version
+version = 0.1
+
+# the account address used to initiate the staking
+account="0x"
+
+[web3]
+rpc=""
+websocket=""
+
+[node]
+
+# node's internal host,
+host = "0.0.0.0"
+
+# The node's port
+port = 60_000
+
+# isFreeNode - node will work freely without taking fees 
+# this is ideal for privateNodes to join the network with their own nodes 
+isFreeNode = false 
+
+# isPrivateNode - private nodes processes only whitelisted accounts 
+# used with isFreeNode can provide a feeless private node
+isPrivateNode = false 
+
+# privateNode whitelisted accounts, this node will only process request from the 
+# whitelisted accounts below, leave it empty or add "any" to process from all 
+# accounts  
+privateNodeAccountsWhitelist = [
+
+]
+
+# boot nodes, discovery nodes for the network 
+bootNodes = [
+
+]
+
+############### DO NOT CHANGE BELOW ################
+# node advertise name for peer discovery 
+peerDiscoveryName = "magicspace.ai"
