@@ -13,11 +13,14 @@ import (
  */
 func GetAppDataDir() (string, error) {
 
-	dataDir := path.Join("../", ".data", "app")
+	curDir,_ := os.Getwd()
+	dataDir := path.Join(curDir, ".data", "app")
 
 	if _, err := os.Stat(dataDir); os.IsNotExist(err) {
 		err = os.MkdirAll(dataDir, os.ModePerm)
-		return "", fmt.Errorf("failed to create appdata dir %s", dataDir)
+		if err != nil {
+			return "", fmt.Errorf("failed to create appdata dir %s", dataDir)
+		}
 	}
 
 	return dataDir, nil
@@ -37,7 +40,10 @@ func loadConfig(filename string) (*viper.Viper, error) {
 
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		_, err := os.Create(filePath)
-		return nil, fmt.Errorf("Failed to create appdata file %s, e=%s", filePath, err)
+
+		if err != nil{
+			return nil, fmt.Errorf("failed to create appdata file %s, err=%w", filePath, err)
+		}
 	}
 
 	v.SetConfigName(filename)
@@ -48,7 +54,7 @@ func loadConfig(filename string) (*viper.Viper, error) {
 }
 
 /**
- * get the app dava in $HOME/.magicspace
+ * get the app dava in cwd/.magicspace
  **/
 func SaveAppData(filename string, data map[string]interface{}) (*viper.Viper, error) {
 
@@ -62,7 +68,7 @@ func SaveAppData(filename string, data map[string]interface{}) (*viper.Viper, er
 		v.Set(key, value)
 	}
 
-	v.SafeWriteConfig()
+	v.WriteConfig()
 
 	return v, nil
 }

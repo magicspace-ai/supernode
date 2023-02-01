@@ -40,3 +40,7 @@ bootNodes = [
 ############### DO NOT CHANGE BELOW ################
 # node advertise name for peer discovery 
 peerDiscoveryName = "magicspace.ai"
+
+# the protocolId is used for identifying pub & sub streams 
+# do not edit 
+protocolId = "magicspace://"

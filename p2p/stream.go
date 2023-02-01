@@ -3,10 +3,10 @@ package p2p
 import (
 	"bufio"
 
-	"github.com/libp2p/go-libp2p-core/network"
+	"github.com/libp2p/go-libp2p/core/network"
 )
 
-func streamHandler(stream *network.Stream) {
+func streamHandler(stream network.Stream) {
 
 	rw := bufio.NewReadWriter(bufio.NewReader(stream), bufio.NewWriter(stream))
 
@@ -18,16 +18,16 @@ func streamHandler(stream *network.Stream) {
  * read incoming stream
  **/
  func readData(rw *bufio.ReadWriter) {
-	for {
+	//for {
 
-	}
+//	}
 }
 
 /**
  * write incoming stream
  **/
 func writeData(rw *bufio.ReadWriter) {
-	for {
+	//for {
 		
-	}
+	//}
 }
