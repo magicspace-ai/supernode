@@ -68,6 +68,10 @@ func MakeNode() (*host.Host, error) {
 	opts := []libp2p.Option{
 		libp2p.ListenAddrStrings(fmt.Sprintf("/ip4/%s/tcp/%d", hostIp, port)),
 		libp2p.Identity(priv),
+		libp2p.DefaultTransports,
+		libp2p.DefaultMuxers,
+		libp2p.DefaultSecurity,
+		libp2p.NATPortMap(),
 	}
 	
 	
