@@ -8,25 +8,8 @@ import (
 	"github.com/libp2p/go-libp2p/core/host"
 )
 
-type MsgRequest struct {
-	id			string
-	sender 		string
-	topic	   	string 
-	account 	string
-	recipients  []string
-	doReply		bool
-	data  		interface{}
-}
 
-type MsgResponse struct {
-	id			string
-	sender 		string
-	recipient	string 
-	account 	string
-	data  		interface{}
-}
-
-const MS_GLOBAL_TOPIC = "magicspace-global-ps"
+const MS_GLOBAL_TOPIC = "magicspace-global-topic"
 
 // initialize the PubSub Engine
 // this is resposible for sending and getting messages
