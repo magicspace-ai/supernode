@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
-	"github.com/libp2p/go-libp2p/core/host"
+	rhost "github.com/libp2p/go-libp2p/p2p/host/routed"
 )
 
 
@@ -14,9 +14,16 @@ const MS_GLOBAL_TOPIC = "magicspace-global-topic"
 // initialize the PubSub Engine
 // this is resposible for sending and getting messages
 // on the protocol
-func initPubSub(ctx *context.Context, host *host.Host) (*pubsub.PubSub, *pubsub.Topic, error) {
+func initPubSub(
+	ctx *context.Context, 
+	rhost *rhost.RoutedHost,
+) (
+	*pubsub.PubSub, 
+	*pubsub.Topic, 
+	error,
+) {
 
-	ps, err := pubsub.NewGossipSub(*ctx, *host)
+	ps, err := pubsub.NewGossipSub(*ctx, rhost)
 
 	if err != nil {
 		return nil, nil, fmt.Errorf("pubsub engine failed to initailize, err=%w", err)

@@ -11,11 +11,12 @@ func main() {
 
 	ctx := context.Background()
 
-	node, err := p2p.MakeNode()
+	// initialize the node
+	_, kDHT, routedHost, err := p2p.MakeNode(ctx)
 
 	utils.HandleError(err, "Node initialization failed", true)
 
-	go p2p.DiscoverPeers(ctx, node)
+	go p2p.DiscoverPeers(ctx, kDHT, routedHost)
 
 	select {}
 }
