@@ -3,8 +3,11 @@ package p2p
 import (
 	"context"
 	"fmt"
+	"time"
 
 	dht "github.com/libp2p/go-libp2p-kad-dht"
+	network "github.com/libp2p/go-libp2p/core/network"
+	peer "github.com/libp2p/go-libp2p/core/peer"
 	drouting "github.com/libp2p/go-libp2p/p2p/discovery/routing"
 	dutil "github.com/libp2p/go-libp2p/p2p/discovery/util"
 	rhost "github.com/libp2p/go-libp2p/p2p/host/routed"
@@ -14,9 +17,9 @@ import (
 // Discover peers using the boostrap method
 // This helps other nodes on the network find themseleves
 func DiscoverPeers(
-	ctx context.Context, 
+	ctx context.Context,
+	rh  *rhost.RoutedHost,
 	dht *dht.IpfsDHT,
-	rHost *rhost.RoutedHost,
 ) {
 
 	fmt.Println("Announcing our node's presence")
@@ -29,8 +32,10 @@ func DiscoverPeers(
 	routingDiscovery := drouting.NewRoutingDiscovery(dht)
 	dutil.Advertise(ctx, routingDiscovery, peerDiscoveryName)
 
-	anyConnected := false
-	for !anyConnected {
+	var peerConnectFailCount = make(map[peer.ID]int64)
+	maxPeerConnectRetries := utils.GetConfig("node.maxPeerConnectRetries", 10).(int64)
+
+	for {
 		
 		fmt.Println("Searching for peers...")
 
@@ -40,21 +45,34 @@ func DiscoverPeers(
 			utils.HandleError(err, "", true)
 		}
 
-		for peerInfo := range peerChan {
-			if peerInfo.ID == rHost.ID() {
+		for peerinfo := range peerChan {
+			if peerinfo.ID == rh.ID() {
 				continue // No self connection
+			}	
+
+			// if already connected, skip it
+			if rh.Network().Connectedness(peerinfo.ID) == network.Connected {
+				continue
 			}
 			
-			err := rHost.Connect(ctx, peerInfo)
+			if peerConnectFailCount[peerinfo.ID] > maxPeerConnectRetries {
+				continue		
+			}
+
+			err := rh.Connect(ctx, peerinfo)
+			//_, err := rh.Network().DialPeer(ctx, peerInfo.ID)
+
 			if err != nil {
-				fmt.Println("Failed connecting to ", peerInfo.ID.Pretty(), ", error:", err)
+				fmt.Println("peer connection failed: ", peerinfo.ID.Pretty(), ", error:", err)
+				peerConnectFailCount[peerinfo.ID] += 1
 			} else {
-				fmt.Println("Connected to:", peerInfo.ID.Pretty())
-				anyConnected = true
+				utils.PrintSuccess("Connected to: %s", peerinfo.ID.Pretty())
+				peerConnectFailCount[peerinfo.ID] = 0
 			}
 		}
+
+		time.Sleep(5 * time.Second)
 	}
 
-	fmt.Println("Peer discovery complete")
 }	
 

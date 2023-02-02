@@ -7,16 +7,17 @@ import (
 	"github.com/magicspace/supernode/utils"
 )
 
+
 func main() {
 
 	ctx := context.Background()
 
 	// initialize the node
-	_, kDHT, routedHost, err := p2p.MakeNode(ctx)
+	rhost, kDHT, err := p2p.MakeNode(ctx)
 
 	utils.HandleError(err, "Node initialization failed", true)
 
-	go p2p.DiscoverPeers(ctx, kDHT, routedHost)
+	go p2p.DiscoverPeers(ctx, rhost, kDHT)
 
 	select {}
 }

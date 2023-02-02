@@ -3,6 +3,8 @@ package utils
 import (
 	"encoding/hex"
 	"fmt"
+
+	color "github.com/fatih/color"
 )
 
 func HandleError(err error, text string, _panic bool) {
@@ -21,3 +23,8 @@ func ToHex(item []byte) string {
 func FromHex(str string) ([]byte, error) {
 	return hex.DecodeString(str)
 }
+
+func PrintSuccess(str string, vargs... interface{}){
+	color.Green(str, vargs...)
+}
+
