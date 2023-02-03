@@ -28,3 +28,7 @@ func PrintSuccess(str string, vargs... interface{}){
 	color.Green(str, vargs...)
 }
 
+func PrintInfo(str string, vargs... interface{}){
+	color.Cyan(str, vargs...)
+}
+

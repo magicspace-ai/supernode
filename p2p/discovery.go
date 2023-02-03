@@ -22,7 +22,12 @@ func DiscoverPeers(
 	dht *dht.IpfsDHT,
 ) {
 
-	fmt.Println("Announcing our node's presence")
+	defer rh.Close()
+
+	// close all openned connections on exit
+	rh.ConnManager().TrimOpenConns(ctx)
+
+	utils.PrintInfo("Announcing our node's presence")
 
 	peerDiscoveryName := utils.GetConfig(
 							"node.peerDiscoveryName", 
@@ -31,10 +36,11 @@ func DiscoverPeers(
 
 	routingDiscovery := drouting.NewRoutingDiscovery(dht)
 	dutil.Advertise(ctx, routingDiscovery, peerDiscoveryName)
-
+	
 	var peerConnectFailCount = make(map[peer.ID]int64)
 	maxPeerConnectRetries := utils.GetConfig("node.maxPeerConnectRetries", 10).(int64)
-
+		
+	
 	for {
 		
 		fmt.Println("Searching for peers...")
@@ -43,24 +49,34 @@ func DiscoverPeers(
 		
 		if err != nil {
 			utils.HandleError(err, "", true)
-		}
+		}		
 
 		for peerinfo := range peerChan {
 			if peerinfo.ID == rh.ID() {
 				continue // No self connection
 			}	
+			
 
-			// if already connected, skip it
-			if rh.Network().Connectedness(peerinfo.ID) == network.Connected {
+			if len(peerinfo.Addrs) == 0 {
+				//utils.PrintInfo("Peer has no addresses: %s", peerinfo.ID.Pretty())
+				rh.Network().ClosePeer(peerinfo.ID)
 				continue
 			}
-			
+
 			if peerConnectFailCount[peerinfo.ID] > maxPeerConnectRetries {
+				rh.Network().ClosePeer(peerinfo.ID)
 				continue		
 			}
 
-			err := rh.Connect(ctx, peerinfo)
-			//_, err := rh.Network().DialPeer(ctx, peerInfo.ID)
+			// if already connected, skip it
+			if rh.Network().Connectedness(peerinfo.ID) == network.Connected {
+				//utils.PrintInfo("Peer Already Connected: %s", peerinfo.ID.Pretty())
+				continue
+			}
+			
+			
+			//err := rh.Connect(ctx, peerinfo)
+			_, err := rh.Network().DialPeer(ctx, peerinfo.ID)
 
 			if err != nil {
 				fmt.Println("peer connection failed: ", peerinfo.ID.Pretty(), ", error:", err)
@@ -69,9 +85,19 @@ func DiscoverPeers(
 				utils.PrintSuccess("Connected to: %s", peerinfo.ID.Pretty())
 				peerConnectFailCount[peerinfo.ID] = 0
 			}
+
+			time.Sleep(100 * time.Nanosecond)
 		}
 
 		time.Sleep(5 * time.Second)
+
+		println()
+		fmt.Printf("Total connected Peers %d \n", len(rh.Network().Peers()))
+		// if no peer was connected, lets try to re advertise our presence
+		//if len(rh.Network().Peers()) == 0 {
+		utils.PrintInfo("re-announcing our node's presence...")
+		dutil.Advertise(ctx, routingDiscovery, peerDiscoveryName)
+		//}
 	}
 
 }	

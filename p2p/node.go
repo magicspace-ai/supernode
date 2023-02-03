@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/magicspace/supernode/core"
 	"github.com/magicspace/supernode/utils"
 
 	"github.com/libp2p/go-libp2p"
@@ -16,6 +17,9 @@ import (
 	protocol "github.com/libp2p/go-libp2p/core/protocol"
 
 	rhost "github.com/libp2p/go-libp2p/p2p/host/routed"
+	dquic "github.com/libp2p/go-libp2p/p2p/transport/quic"
+	"github.com/libp2p/go-libp2p/p2p/transport/tcp"
+	"github.com/libp2p/go-libp2p/p2p/transport/websocket"
 	ma "github.com/multiformats/go-multiaddr"
 )
 
@@ -24,11 +28,17 @@ import (
 /**
  * create node
  */
-func MakeNode(ctx context.Context) (
+func MakeNode( ctx context.Context ) (
 	*rhost.RoutedHost, 
 	*dht.IpfsDHT, 
 	error,
 ) {
+
+	resourceManager, err := core.GetResourceMgr()
+
+	if err != nil {
+		return nil, nil, err
+	}
 
 	hostIp := utils.GetConfig("node.host", "0.0.0.0").(string)
 	port   := utils.GetConfig("node.port", 60_000).(int64)
@@ -40,7 +50,6 @@ func MakeNode(ctx context.Context) (
 		return nil, nil, err
 	}
 
-	
 	var priv crypto.PrivKey
 
 	if !(identity.IsSet("privateKey") && identity.Get("privateKey").(string) == "") {
@@ -76,11 +85,27 @@ func MakeNode(ctx context.Context) (
 		}	
 			
 	}
-	
-	
+		
 	opts := []libp2p.Option{
-		libp2p.ListenAddrStrings(fmt.Sprintf("/ip4/%s/tcp/%d", hostIp, port)),
+		libp2p.ListenAddrStrings(
+			fmt.Sprintf("/ip4/%s/tcp/%d", hostIp, port),
+			fmt.Sprintf("/ip4/%s/tcp/%d/ws", hostIp, port),
+			fmt.Sprintf("/ip4/%s/tcp/%d/quic", hostIp, port),
+		),
 		libp2p.Identity(priv),
+		libp2p.NoTransports,
+
+		//libp2p.EnableAutoRelay(),
+		libp2p.EnableRelayService(),
+		libp2p.EnableNATService(),
+		libp2p.ForceReachabilityPublic(),
+		libp2p.EnableRelay(),
+		libp2p.NATPortMap(),
+		libp2p.Transport(tcp.NewTCPTransport),
+		libp2p.Transport(websocket.New),
+		libp2p.Transport(dquic.NewTransport),
+		libp2p.DefaultMuxers,
+		libp2p.ResourceManager(resourceManager),
 	}
 	
 	
@@ -144,7 +169,7 @@ func  initDHT(
 	}
 
 	dhtOpts := []dht.Option{
-		dht.Mode(dht.ModeAutoServer),
+		//dht.Mode(dht.ModeAutoServer),
 		dht.BootstrapPeers(dhtBootPeers...),
 	}
 

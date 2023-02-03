@@ -15,7 +15,7 @@ websocket=""
 host = "0.0.0.0"
 
 # The node's port
-port = 60_000
+port = 62_000
 
 # isFreeNode - node will work freely without taking fees 
 # this is ideal for privateNodes to join the network with their own nodes 
@@ -47,4 +47,4 @@ protocolId = "magicspace/1.0.0"
 
 # max peer connect retries, the number of times a peer connection 
 # will be retried, default is 10 retries
-maxPeerConnectRetries = 10
+maxPeerConnectRetries = 3
