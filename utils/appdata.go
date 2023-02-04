@@ -12,18 +12,7 @@ import (
  * get the app data dir
  */
 func GetAppDataDir() (string, error) {
-
-	curDir,_ := os.Getwd()
-	dataDir := path.Join(curDir, ".data", "app")
-
-	if _, err := os.Stat(dataDir); os.IsNotExist(err) {
-		err = os.MkdirAll(dataDir, os.ModePerm)
-		if err != nil {
-			return "", fmt.Errorf("failed to create appdata dir %s", dataDir)
-		}
-	}
-
-	return dataDir, nil
+	return GetDataDir("app")
 }
 
 func loadConfig(filename string) (*viper.Viper, error) {

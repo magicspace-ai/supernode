@@ -3,6 +3,8 @@ package utils
 import (
 	"encoding/hex"
 	"fmt"
+	"os"
+	"path"
 
 	color "github.com/fatih/color"
 )
@@ -30,5 +32,20 @@ func PrintSuccess(str string, vargs... interface{}){
 
 func PrintInfo(str string, vargs... interface{}){
 	color.Cyan(str, vargs...)
+}
+
+func GetDataDir(subDir string) (string, error) {
+	
+	curDir,_ := os.Getwd()
+	dataDir := path.Join(curDir, ".data", subDir)
+
+	if _, err := os.Stat(dataDir); os.IsNotExist(err) {
+		err = os.MkdirAll(dataDir, os.ModePerm)
+		if err != nil {
+			return "", fmt.Errorf("failed to create data dir %s", dataDir)
+		}
+	}
+
+	return dataDir, nil
 }
 

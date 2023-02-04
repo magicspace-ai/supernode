@@ -1,5 +1,3 @@
 package core
 
-func InitDatabus() {
 
-}

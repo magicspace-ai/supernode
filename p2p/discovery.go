@@ -8,6 +8,7 @@ import (
 	dht "github.com/libp2p/go-libp2p-kad-dht"
 	network "github.com/libp2p/go-libp2p/core/network"
 	peer "github.com/libp2p/go-libp2p/core/peer"
+	"github.com/libp2p/go-libp2p/core/peerstore"
 	drouting "github.com/libp2p/go-libp2p/p2p/discovery/routing"
 	dutil "github.com/libp2p/go-libp2p/p2p/discovery/util"
 	rhost "github.com/libp2p/go-libp2p/p2p/host/routed"
@@ -39,7 +40,7 @@ func DiscoverPeers(
 	
 	var peerConnectFailCount = make(map[peer.ID]int64)
 	maxPeerConnectRetries := utils.GetConfig("node.maxPeerConnectRetries", 10).(int64)
-		
+	var totalConnectedPeers = 0	
 	
 	for {
 		
@@ -84,20 +85,30 @@ func DiscoverPeers(
 			} else {
 				utils.PrintSuccess("Connected to: %s", peerinfo.ID.Pretty())
 				peerConnectFailCount[peerinfo.ID] = 0
+				totalConnectedPeers += 1
+				rh.Peerstore().AddAddrs(
+					peerinfo.ID, 
+					peerinfo.Addrs,
+					peerstore.TempAddrTTL,
+				)
 			}
 
 			time.Sleep(100 * time.Nanosecond)
 		}
 
-		time.Sleep(5 * time.Second)
+		
 
 		println()
 		fmt.Printf("Total connected Peers %d \n", len(rh.Network().Peers()))
+		
 		// if no peer was connected, lets try to re advertise our presence
-		//if len(rh.Network().Peers()) == 0 {
-		utils.PrintInfo("re-announcing our node's presence...")
-		dutil.Advertise(ctx, routingDiscovery, peerDiscoveryName)
-		//}
+		if totalConnectedPeers == 0 {
+			utils.PrintInfo("re-announcing our node's presence...")
+			dutil.Advertise(ctx, routingDiscovery, peerDiscoveryName)
+			time.Sleep(5 * time.Second)
+		} else {
+			time.Sleep(30 * time.Second)
+		}
 	}
 
 }	
