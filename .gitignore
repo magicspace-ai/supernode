@@ -14,6 +14,6 @@
 # Dependency directories (remove the comment below to include it)
 # vendor/
 s2
-.data/app/identity.toml
 supernode
 .magicspace/app/identity.toml
+.data/app/identity.toml
