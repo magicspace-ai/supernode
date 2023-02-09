@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/magicspace/supernode/p2p"
 	"github.com/magicspace/supernode/utils"
@@ -26,11 +27,23 @@ func main() {
 	utils.HandleError(err, "pubsub init error", true)
 
 	//time.Sleep(5 * time.Second)
+	go func() {
+		for {
 
-	utils.PrintInfo("Publishing Global Topic Msg")
-	 err = globalTopic.Publish(ctx, []byte(fmt.Sprintf("Hello I am %s", rhost.ID().Pretty())))
+			//conns := rhost.Peerstore().Peers()
 
-	 utils.HandleError(err, "pubsub publish error", false)
+			fmt.Printf("Total Connections: %d\n", len(rhost.Peerstore().Peers()))
+			fmt.Println("")
+
+			
+			utils.PrintInfo("Publishing Global Topic Msg")
+			err = globalTopic.Publish(ctx, []byte(fmt.Sprintf("Hello I am %s", rhost.ID().Pretty())))
+
+			utils.HandleError(err, "pubsub publish error", false)
+			
+			time.Sleep(10 * time.Second)
+		}
+	}()
 
 	select {}
 }

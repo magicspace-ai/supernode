@@ -34,10 +34,14 @@ func PrintInfo(str string, vargs... interface{}){
 	color.Cyan(str, vargs...)
 }
 
+func PrintError(str string, vargs... interface{}){
+	color.Red(str, vargs...)
+}
+
 func GetDataDir(subDir string) (string, error) {
 	
 	curDir,_ := os.Getwd()
-	dataDir := path.Join(curDir, ".data", subDir)
+	dataDir := path.Join(curDir, ".magicspace", subDir)
 
 	if _, err := os.Stat(dataDir); os.IsNotExist(err) {
 		err = os.MkdirAll(dataDir, os.ModePerm)

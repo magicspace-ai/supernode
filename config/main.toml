@@ -43,8 +43,12 @@ peerDiscoveryName = "magicspace-ai"
 
 # the protocolId is used for identifying pub & sub streams 
 # do not edit 
-protocolId = "magicspace/1.0.0"
+protocolId = "magicspace://"
 
 # max peer connect retries, the number of times a peer connection 
 # will be retried, default is 10 retries
 maxPeerConnectRetries = 3
+
+
+# Time interval in seconds to periodically scan for new peers
+peerDiscoveryScanInterval = 30 

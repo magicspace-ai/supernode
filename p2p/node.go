@@ -2,20 +2,19 @@ package p2p
 
 import (
 	"context"
-	"crypto/rand"
 	"fmt"
 	"sync"
 
 	"github.com/magicspace/supernode/core"
 	"github.com/magicspace/supernode/utils"
 
+	ethCrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/libp2p/go-libp2p"
 	dht "github.com/libp2p/go-libp2p-kad-dht"
-	crypto "github.com/libp2p/go-libp2p/core/crypto"
+	lcrypto "github.com/libp2p/go-libp2p/core/crypto"
 	host "github.com/libp2p/go-libp2p/core/host"
 	"github.com/libp2p/go-libp2p/core/peer"
 	protocol "github.com/libp2p/go-libp2p/core/protocol"
-
 	rhost "github.com/libp2p/go-libp2p/p2p/host/routed"
 	dquic "github.com/libp2p/go-libp2p/p2p/transport/quic"
 	"github.com/libp2p/go-libp2p/p2p/transport/tcp"
@@ -44,48 +43,21 @@ func MakeNode( ctx context.Context ) (
 	port   := utils.GetConfig("node.port", 60_000).(int64)
 	protocolId := utils.GetConfig("node.protocolId", "magicspace://").(string)
 
-	identity, err := utils.GetAppData("identity")
+	identity, err := GetPrivateKey()
 
-	if err != nil {
+	if err != nil  {
 		return nil, nil, err
 	}
 
-	var priv crypto.PrivKey
+	privKeyBytes := ethCrypto.FromECDSA(identity.PrivateKey)
+	
+	priv, err := lcrypto.UnmarshalSecp256k1PrivateKey(privKeyBytes)
 
-	if !(identity.IsSet("privateKey") && identity.Get("privateKey").(string) == "") {
-
-		priv, _, err := crypto.GenerateKeyPairWithReader(crypto.RSA, 2048, rand.Reader)
-
-		if err != nil {
-			return nil, nil, err
-		}
-
-		privkeyBytes, _ := priv.Raw()
-		pubKeyBytes, _ := priv.GetPublic().Raw()
-
-		dataToSave := map[string]interface{}{
-			"privateKey": utils.ToHex(privkeyBytes),
-			"publicKey":  utils.ToHex(pubKeyBytes),
-		}
-
-		utils.SaveAppData("identity", dataToSave)
-
-	} else {
-
-		privBytes, err := utils.FromHex(identity.Get("privateKey").(string))
-
-		if err != nil{
-			return nil, nil, err
-		}
-
-		priv, _, err = crypto.KeyPairFromStdKey(privBytes)
-
-		if err != nil{
-			return nil, nil, err
-		}	
-			
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to unmarshall eth private key err=%w", err)
 	}
-		
+
+
 	opts := []libp2p.Option{
 		libp2p.ListenAddrStrings(
 			fmt.Sprintf("/ip4/%s/tcp/%d", hostIp, port),

@@ -43,7 +43,7 @@ func loadConfig(filename string) (*viper.Viper, error) {
 }
 
 /**
- * get the app dava in cwd/.magicspace
+ * get the app data in cwd/.magicspace
  **/
 func SaveAppData(filename string, data map[string]interface{}) (*viper.Viper, error) {
 

@@ -125,10 +125,17 @@ require (
 )
 
 require (
+	github.com/btcsuite/btcd v0.22.1 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.2.0 // indirect
+	github.com/btcsuite/btcd/chaincfg/chainhash v1.0.1 // indirect
+	github.com/decred/dcrd/dcrec/secp256k1 v1.0.3 // indirect
+	github.com/decred/dcrd/dcrec/secp256k1/v2 v2.0.0 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/ethereum/go-ethereum v1.10.26 // indirect
 	github.com/fatih/color v1.14.1 // indirect
+	github.com/libp2p/go-libp2p-core v0.16.1 // indirect
 	github.com/libp2p/go-libp2p-pubsub v0.8.3 // indirect
+	github.com/libp2p/go-libp2p-routing-helpers v0.4.0 // indirect
+	github.com/libp2p/go-libp2p-swarm v0.11.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 )
