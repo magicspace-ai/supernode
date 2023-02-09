@@ -16,5 +16,4 @@
 s2
 .data/app/identity.toml
 supernode
-.data/app/identity.toml
-.data/app/identity.toml
+.magicspace/app/identity.toml
